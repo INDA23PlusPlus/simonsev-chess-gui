@@ -18,7 +18,6 @@ use std::{thread, time};
 
 use std::collections::HashMap;
 use std::collections::HashSet;
-use lazy_static::*;
 
 const C_RISE: (u8, u8, u8, u8) = (220, 60, 130, 255);
 const SEE_RICE: (u8, u8, u8, u8) = (220, 120, 170, 255);
@@ -79,14 +78,15 @@ impl event::EventHandler<ggez:: GameError> for State {
     ) -> GameResult {
         self.set_drop_pos(y, x);
         self.mouse_down = false;
-        match self.do_move() {
-            Ok(T) => {
+        match self.do_move(ctx) {
+            Ok(t) => {
                 let temp = self.piece_map.get(&self.pick_pos).unwrap();
                 self.piece_map.insert(
                     self.drop_pos, 
                     temp.clone(),
                 );
                 self.piece_map.remove(&self.pick_pos);
+                self.update_piece_map(ctx);
             }
             _ => (),
         }
@@ -136,8 +136,6 @@ pub struct State {
     mate_anim_state: bool,
 }
 
-
-
 impl State {
     pub fn new(ctx: &mut ggez::Context) -> ggez::GameResult<State> {
         let mut state = State {
@@ -146,12 +144,14 @@ impl State {
             drop_pos: (0, 0),
             paint_board: Vec::new(),
             game: Game::start_pos(),
-            piece_map: Self::build_piece_map(ctx),
+            piece_map: HashMap::new(),
             mouse_x: 0.0,
             mouse_y: 0.0,
             D_SEKT: false,
             mate_anim_state: false,
         };
+        state.build_piece_map_new(ctx);
+        //state.piece_map = state.build_piece_map_new(ctx);
         state.paint_board = state.build_paint_board(ctx);
         Ok(state)
     }
@@ -273,6 +273,88 @@ impl State {
         }
         
     }
+    
+    pub fn update_piece_map(
+        &mut self,
+        ctx: &Context,
+    ) {
+        for i in 0..8 {
+            for j in 0..8 {
+                if self.piece_map.contains_key(&(i as u32, j as u32)) {
+                    if let None = self.game.get_board().get_tile(i , j) {
+                        self.piece_map.remove(&(i as u32, j as u32));
+                    }
+                }
+
+                if let Some(piece) = self.game.get_board().get_tile(i, j) {
+                    if !self.piece_map.contains_key(&(i as u32, j as u32)) {
+                        match piece.color {
+                            fritiofr_chess::Color::Black => {
+                                match piece.piece_type {
+                                    PieceType::Pawn => self.piece_map.insert((i as u32, j as u32), graphics::Image::from_path(ctx, "/b_pawn_2x_ns.png").unwrap()),
+                                    PieceType::Rook => self.piece_map.insert((i as u32, j as u32), graphics::Image::from_path(ctx, "/b_rook_2x_ns.png").unwrap()),
+                                    PieceType::Knight => self.piece_map.insert((i as u32, j as u32), graphics::Image::from_path(ctx, "/b_knight_2x_ns.png").unwrap()),
+                                    PieceType::Bishop => self.piece_map.insert((i as u32, j as u32), graphics::Image::from_path(ctx, "/b_bishop_2x_ns.png").unwrap()),
+                                    PieceType::Queen => self.piece_map.insert((i as u32, j as u32), graphics::Image::from_path(ctx, "/b_queen_2x_ns.png").unwrap()),
+                                    PieceType::King => self.piece_map.insert((i as u32, j as u32), graphics::Image::from_path(ctx, "/b_king_2x_ns.png").unwrap()),
+                                }
+                            },
+                            fritiofr_chess::Color::White => {
+                                match piece.piece_type {
+                                    PieceType::Pawn => self.piece_map.insert((i as u32, j as u32), graphics::Image::from_path(ctx, "/w_pawn_2x_ns.png").unwrap()),
+                                    PieceType::Rook => self.piece_map.insert((i as u32, j as u32), graphics::Image::from_path(ctx, "/w_rook_2x_ns.png").unwrap()),
+                                    PieceType::Knight => self.piece_map.insert((i as u32, j as u32), graphics::Image::from_path(ctx, "/w_knight_2x_ns.png").unwrap()),
+                                    PieceType::Bishop => self.piece_map.insert((i as u32, j as u32), graphics::Image::from_path(ctx, "/w_bishop_2x_ns.png").unwrap()),
+                                    PieceType::Queen => self.piece_map.insert((i as u32, j as u32), graphics::Image::from_path(ctx, "/w_queen_2x_ns.png").unwrap()),
+                                    PieceType::King => self.piece_map.insert((i as u32, j as u32), graphics::Image::from_path(ctx, "/w_king_2x_ns.png").unwrap()),
+                                }
+                            },
+                        };
+                    }
+                }
+                
+            }
+        }
+    }
+
+    pub fn build_piece_map_new(
+        &mut self, 
+        ctx: &Context
+    ) {
+
+        let mut map: HashMap<(u32, u32), Image> = HashMap::new();
+
+        for i in 0..8 {
+            for j in 0..8 {
+
+                if let Some(piece) = self.game.get_board().get_tile(i, j) {
+                    match piece.color {
+                        fritiofr_chess::Color::Black => {
+                            match piece.piece_type {
+                                PieceType::Pawn => map.insert((i as u32, j as u32), graphics::Image::from_path(ctx, "/b_pawn_2x_ns.png").unwrap()),
+                                PieceType::Rook => map.insert((i as u32, j as u32), graphics::Image::from_path(ctx, "/b_rook_2x_ns.png").unwrap()),
+                                PieceType::Knight => map.insert((i as u32, j as u32), graphics::Image::from_path(ctx, "/b_knight_2x_ns.png").unwrap()),
+                                PieceType::Bishop => map.insert((i as u32, j as u32), graphics::Image::from_path(ctx, "/b_bishop_2x_ns.png").unwrap()),
+                                PieceType::Queen => map.insert((i as u32, j as u32), graphics::Image::from_path(ctx, "/b_queen_2x_ns.png").unwrap()),
+                                PieceType::King => map.insert((i as u32, j as u32), graphics::Image::from_path(ctx, "/b_king_2x_ns.png").unwrap()),
+                            }
+                        },
+                        fritiofr_chess::Color::White => {
+                            match piece.piece_type {
+                                PieceType::Pawn => map.insert((i as u32, j as u32), graphics::Image::from_path(ctx, "/w_pawn_2x_ns.png").unwrap()),
+                                PieceType::Rook => map.insert((i as u32, j as u32), graphics::Image::from_path(ctx, "/w_rook_2x_ns.png").unwrap()),
+                                PieceType::Knight => map.insert((i as u32, j as u32), graphics::Image::from_path(ctx, "/w_knight_2x_ns.png").unwrap()),
+                                PieceType::Bishop => map.insert((i as u32, j as u32), graphics::Image::from_path(ctx, "/w_bishop_2x_ns.png").unwrap()),
+                                PieceType::Queen => map.insert((i as u32, j as u32), graphics::Image::from_path(ctx, "/w_queen_2x_ns.png").unwrap()),
+                                PieceType::King => map.insert((i as u32, j as u32), graphics::Image::from_path(ctx, "/w_king_2x_ns.png").unwrap()),
+                            }
+                        },
+                    };
+                }
+            }
+        }
+        self.piece_map = map;
+    }
 
     pub fn build_piece_map(
         ctx: &Context
@@ -313,8 +395,10 @@ impl State {
         map
     }
 
+
     pub fn do_move(
         &mut self,
+        ctx: &mut Context,
     ) -> Result::<(), GameApplyMoveError> {
         let mut moves = self.game.gen_moves(self.pick_pos.0 as usize, self.pick_pos.1 as usize);
         match moves {
@@ -326,6 +410,30 @@ impl State {
         let mut moves = moves.unwrap();
         let mv = moves.iter().find(|mv| mv.to() == (self.drop_pos.0 as usize, self.drop_pos.1 as usize));
         if let Some(mv) = mv {
+            if mv.is_promotion() {
+                let x = mv.from().0 as u32;
+                let y = mv.from().1 as u32;
+                match self.game.get_board().get_tile(mv.from().0, mv.from().1).unwrap().color {
+                    fritiofr_chess::Color::Black => {
+                        match mv.promotion().unwrap() {
+                            PieceType::Queen => self.piece_map.insert((x, y), graphics::Image::from_path(ctx, "/b_queen_2x_ns.png").unwrap()),
+                            PieceType::Bishop => self.piece_map.insert((x, y), graphics::Image::from_path(ctx, "/b_bishop_2x_ns.png").unwrap()),
+                            PieceType::Rook => self.piece_map.insert((x, y), graphics::Image::from_path(ctx, "/b_rook_2x_ns.png").unwrap()),
+                            PieceType::Knight => self.piece_map.insert((x, y), graphics::Image::from_path(ctx, "/b_knight_2x_ns.png").unwrap()),
+                            _ => panic!("thats crazy")
+                        }
+                    },
+                    fritiofr_chess::Color::White => {
+                        match mv.promotion().unwrap() {
+                            PieceType::Queen => self.piece_map.insert((x, y), graphics::Image::from_path(ctx, "/w_queen_2x_ns.png").unwrap()),
+                            PieceType::Bishop => self.piece_map.insert((x, y), graphics::Image::from_path(ctx, "/w_bishop_2x_ns.png").unwrap()),
+                            PieceType::Rook => self.piece_map.insert((x, y), graphics::Image::from_path(ctx, "/w_rook_2x_ns.png").unwrap()),
+                            PieceType::Knight => self.piece_map.insert((x, y), graphics::Image::from_path(ctx, "/w_knight_2x_ns.png").unwrap()),
+                            _ => panic!("thats crazy")
+                        }
+                    },
+                };
+            }
             return self.game.apply_move(*mv);
         }
         Err(GameApplyMoveError::InvalidMove)

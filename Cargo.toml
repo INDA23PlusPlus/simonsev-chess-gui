@@ -3,7 +3,11 @@ name = "simonsev-chess-gui"
 version = "0.1.0"
 edition = "2021"
 
+[lib]
+name = "simonsev-chess-gui"
+path = "src/gui.rs"
+
 [dependencies]
 fritiofr_chess = { git = "https://github.com/INDA23PlusPlus/fritiofr-chess" }
 ggez = "0.9.3"
-lazy_static = "1.0.0"
+
