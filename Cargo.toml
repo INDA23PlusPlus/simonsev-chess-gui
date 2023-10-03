@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [lib]
-name = "simonsev-chess-gui"
+name = "simonsev_chess_gui"
 path = "src/gui.rs"
 
 [dependencies]

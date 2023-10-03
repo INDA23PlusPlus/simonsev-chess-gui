@@ -1,4 +1,4 @@
 /target/
 /Cargo.lock
 /main.rs
-/*.DS_Store
+*.DS_Store
