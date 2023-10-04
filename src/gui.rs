@@ -128,7 +128,7 @@ pub struct State {
     pick_pos: (u32, u32),
     drop_pos: (u32, u32),
     paint_board: Vec<Mesh>,
-    game: Game,
+    pub game: Game,
     piece_map: HashMap<(u32, u32), Image>,
     mouse_x: f32,
     mouse_y: f32,
@@ -155,6 +155,7 @@ impl State {
         state.paint_board = state.build_paint_board(ctx);
         Ok(state)
     }
+
 
     pub fn check_for_mate(
         &mut self,
