@@ -23,7 +23,7 @@ const C_RISE: (u8, u8, u8, u8) = (220, 60, 130, 255);
 const SEE_RICE: (u8, u8, u8, u8) = (220, 120, 170, 255);
 const royal: (u8, u8, u8, u8) = (230, 200, 20, 255);
 
-impl event::EventHandler<ggez:: GameError> for State {
+impl event::EventHandler<ggez:: GameError> for GameState {
     fn update(&mut self, ctx: &mut Context) -> GameResult {
         const DESIRED_FPS: u32 = 2;
         while timer::check_update_time(ctx, DESIRED_FPS) {
@@ -123,7 +123,7 @@ impl event::EventHandler<ggez:: GameError> for State {
     }
 }
 
-pub struct State {
+pub struct GameState {
     mouse_down: bool,
     pick_pos: (u32, u32),
     drop_pos: (u32, u32),
@@ -136,9 +136,9 @@ pub struct State {
     mate_anim_state: bool,
 }
 
-impl State {
-    pub fn new(ctx: &mut ggez::Context) -> ggez::GameResult<State> {
-        let mut state = State {
+impl GameState {
+    pub fn new(ctx: &mut ggez::Context) -> ggez::GameResult<GameState> {
+        let mut GameState = GameState {
             mouse_down: false,
             pick_pos: (0, 0),
             drop_pos: (0, 0),
@@ -150,10 +150,10 @@ impl State {
             D_SEKT: false,
             mate_anim_state: false,
         };
-        state.build_piece_map_new(ctx);
-        //state.piece_map = state.build_piece_map_new(ctx);
-        state.paint_board = state.build_paint_board(ctx);
-        Ok(state)
+        GameState.build_piece_map_new(ctx);
+        //GameState.piece_map = GameState.build_piece_map_new(ctx);
+        GameState.paint_board = GameState.build_paint_board(ctx);
+        Ok(GameState)
     }
 
 

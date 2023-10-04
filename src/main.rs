@@ -18,7 +18,7 @@ fn main() -> GameResult {
             .resizable(false),
     );
     let (mut ctx, event_loop) = cb.add_resource_path("./assets").build()?;
-    let state = State::new(&mut ctx);
-    event::run(ctx, event_loop, state.unwrap());
+    let game_state = GameState::new(&mut ctx);
+    event::run(ctx, event_loop, game_state.unwrap());
 }
 
